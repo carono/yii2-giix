@@ -9,7 +9,7 @@
       "email": "spamer2000@list.ru"
     }
   ],
-  "require": {
+  "require-dev": {
     "schmunk42/yii2-giiant": "^0.9.0"
   },
   "autoload": {
