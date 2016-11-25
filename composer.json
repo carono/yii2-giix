@@ -1,0 +1,23 @@
+{
+  "name": "carono/yii2-giix",
+  "description": "Yii2 gii generator based on schmunk42/yii2-giiant",
+  "type": "yii2 component",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "carno",
+      "email": "spamer2000@list.ru"
+    }
+  ],
+  "require": {
+    "schmunk42/yii2-giiant": "^0.9.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "carono\\giix\\": ""
+    }
+  },
+  "extra": {
+    "bootstrap": "carono\\giix\\Bootstrap"
+  }
+}
