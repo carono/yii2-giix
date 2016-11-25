@@ -1,7 +1,7 @@
 {
   "name": "carono/yii2-giix",
   "description": "Yii2 gii generator based on schmunk42 yii2-giiant",
-  "type": "yii2 component",
+  "type": "yii2-component",
   "license": "MIT",
   "authors": [
     {
