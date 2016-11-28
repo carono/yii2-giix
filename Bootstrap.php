@@ -25,10 +25,10 @@ class Bootstrap implements BootstrapInterface
          * @var Module $gii
          */
         if ($app instanceof \yii\console\Application) {
+            $template = '@vendor/carono/yii2-giix/templates/model';
+            GiixController::addGeneratorToGii('giiant-model', Generator::className());
+            GiixController::addTemplateToGiiGenerator('giiant-model', 'caronoModel', $template);
             if (!isset($app->controllerMap['giix'])) {
-                $template = '@vendor/carono/yii2-giix/templates/model';
-                GiixController::addGeneratorToGii('giiant-model', Generator::className());
-                GiixController::addTemplateToGiiGenerator('giiant-model', 'caronoModel', $template);
                 $app->controllerMap['giix'] = 'carono\giix\GiixController';
             }
         }
