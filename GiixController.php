@@ -24,8 +24,6 @@ class GiixController extends BatchController
                 $this->modelQueryNamespace = 'common\models\query';
             }
         }
-        if ($this->templatePath) {
-        }
     }
 
     protected function getYiiConfiguration()
@@ -33,17 +31,14 @@ class GiixController extends BatchController
         $config = parent::getYiiConfiguration();
         $class = 'schmunk42\giiant\generators\model\Generator';
         $name = 'giiant-model';
-        $template = '@vendor/carono/yii2-giix/templates/model';
-
+        $template = $this->templatePath ? $this->templatePath : '@vendor/carono/yii2-giix/templates/model';
         self::addTemplateToGiiGenerator($config, $class, $name, $template);
-
         return $config;
     }
 
     public static function addTemplateToGiiGenerator(&$config, $generator, $name, $template)
     {
         self::prepareGii($config);
-
         $config['modules']['gii']['generators'][$name] = [
             'class'     => $generator,
             'templates' => [
