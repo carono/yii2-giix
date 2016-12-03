@@ -3,6 +3,7 @@
 namespace carono\giix;
 
 use schmunk42\giiant\commands\BatchController;
+use schmunk42\giiant\generators\model\Generator;
 
 class GiixController extends BatchController
 {
@@ -11,10 +12,11 @@ class GiixController extends BatchController
     public $defaultAction = 'models';
     public $interactive = false;
     public $template = 'caronoModel';
+    public $templatePath;
 
     public function init()
     {
-        try {
+        if (in_array('common',\Yii::$aliases)){
             \Yii::getAlias('@common');
             if ($this->modelNamespace == 'app\models') {
                 $this->modelNamespace = 'common\models';
@@ -22,8 +24,27 @@ class GiixController extends BatchController
             if ($this->modelQueryNamespace == 'app\models\query') {
                 $this->modelQueryNamespace = 'common\models\query';
             }
-        } catch (\Exception $e) {
         }
+        if ($this->templatePath) {
+        }
+    }
+
+    protected function getYiiConfiguration()
+    {
+        $config = parent::getYiiConfiguration();
+
+        $config['modules']['gii'] = [
+            'class'      => 'yii\gii\Module',
+            'generators' => [
+                'giiant-model' => [
+                    'class'     => Generator::className(),
+                    'templates' => [
+                        'caronoModel' => '@vendor/carono/yii2-giix/templates/model'
+                    ]
+                ]
+            ]
+        ];
+        return $config;
     }
 
     public static function addTemplateToGiiGenerator($generator, $name, $template)
