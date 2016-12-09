@@ -13,14 +13,21 @@
  * @var array $relations list of relations (name => relation declaration)
  */
 $relationClasses = [];
+$r = [];
 foreach ($relations as $name => $relation){
-    preg_match('/.*hasOne.*\[.*\s=>\s\'(.*)\'\]/',$relation[0],$m);
-    if (isset($m[1])) {
-        $relationClasses[] = "'$m[1]'=>'{$generator->ns}" . '\\' . "{$relation[1]}'";
+    if (preg_match('/.*hasOne.*\\\(.*)::className\(\).*\[.*\s=>\s\'(.*)\'\]/',$relation[0],$m)) {
+        $relationClasses[] = "'$m[2]'=>'{$generator->ns}" . '\\' . "{$relation[1]}'";
+        $r[$name] = $m[1];
+    }
+    if (preg_match('/.*hasMany.*\\\(.*)::className\(\).*\[.*\s=>\s\'.*\'\]/',$relation[0],$m)) {
+        $r[$name] = $m[1];
     }
 }
 $relationClasses = join(",\r",$relationClasses );
 echo "<?php\n";
+
+//print_r($relationClasses);
+//exit;
 ?>
 
 namespace <?= $generator->ns ?>\base;
@@ -124,7 +131,7 @@ if(!empty($enum)){
 <?php foreach ($relations as $name => $relation): ?>
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return \<?=$generator->queryNs .'\\'. (isset($r[$name]) ? $r[$name] : '?')."Query\n" ?>
      */
     public function get<?= $name ?>()
     {
