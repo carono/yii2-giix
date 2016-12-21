@@ -15,8 +15,7 @@ class GiixController extends BatchController
 
     public function init()
     {
-        if (in_array('common', \Yii::$aliases)) {
-            \Yii::getAlias('@common');
+        if (key_exists('@common', \Yii::$aliases)) {
             if ($this->modelNamespace == 'app\models') {
                 $this->modelNamespace = 'common\models';
             }

@@ -80,6 +80,21 @@ if(!empty($enum)){
 <?php
 }
 ?>
+
+    /**
+    * @inheritdoc
+    * @return \<?= $generator->ns ."\\".$className ?>
+    */
+    public static function findOne($condition, $raise = false)
+    {
+        $model = parent::findOne($condition);
+        if (!$model && $raise){
+            throw new \yii\web\HttpException(404,'Model <?=$generator->ns ."\\".$className?> not found');
+        }else{
+            return $model;
+        }
+    }
+
     /**
      * @inheritdoc
      */
