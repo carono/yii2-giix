@@ -28,7 +28,7 @@ class GiixController extends BatchController
     protected function getYiiConfiguration()
     {
         $config = parent::getYiiConfiguration();
-        $class = 'schmunk42\giiant\generators\model\Generator';
+        $class = 'carono\giix\generators\model\Generator';
         $name = 'giiant-model';
         $template = $this->templatePath ? $this->templatePath : '@vendor/carono/yii2-giix/templates/model';
         self::addTemplateToGiiGenerator($config, $class, $name, $template);

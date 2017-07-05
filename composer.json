@@ -10,7 +10,8 @@
     }
   ],
   "require": {
-    "schmunk42/yii2-giiant": "@stable"
+    "schmunk42/yii2-giiant": "@stable",
+    "nette/php-generator": "@stable"
   },
   "autoload": {
     "psr-4": {
