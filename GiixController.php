@@ -12,6 +12,7 @@ class GiixController extends BatchController
     public $interactive = false;
     public $template = 'caronoModel';
     public $templatePath;
+    public $generator = 'carono\giix\generators\model\Generator';
 
     public function init()
     {
@@ -28,10 +29,9 @@ class GiixController extends BatchController
     protected function getYiiConfiguration()
     {
         $config = parent::getYiiConfiguration();
-        $class = 'carono\giix\generators\model\Generator';
         $name = 'giiant-model';
         $template = $this->templatePath ? $this->templatePath : '@vendor/carono/yii2-giix/templates/model';
-        self::addTemplateToGiiGenerator($config, $class, $name, $template);
+        self::addTemplateToGiiGenerator($config, $this->generator, $name, $template);
         return $config;
     }
 
@@ -39,7 +39,7 @@ class GiixController extends BatchController
     {
         self::prepareGii($config);
         $config['modules']['gii']['generators'][$name] = [
-            'class'     => $generator,
+            'class' => $generator,
             'templates' => [
                 'caronoModel' => $template
             ]
@@ -50,7 +50,7 @@ class GiixController extends BatchController
     {
         if (!is_array($config['modules']['gii'])) {
             $config['modules']['gii'] = [
-                'class'      => 'yii\gii\Module',
+                'class' => 'yii\gii\Module',
                 'generators' => []
             ];
         } elseif (isset($config['modules']['gii']['generators'])) {

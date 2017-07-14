@@ -109,7 +109,7 @@ class Generator extends \schmunk42\giiant\generators\model\Generator
         $className = $params['className'];
         if ($queryClassName) {
             $alias = '@' . str_replace('\\', '/', $this->queryNs);
-            $queryClassFile = Yii::getAlias($alias) . '/../base/' . $queryClassName . '.php';
+            $queryClassFile = Yii::getAlias($alias) . '/base/' . $queryClassName . '.php';
             $params['className'] = $queryClassName;
             $params['modelClassName'] = $className;
             return new CodeFile($queryClassFile, $this->render('query.php', $params));
@@ -131,6 +131,17 @@ class Generator extends \schmunk42\giiant\generators\model\Generator
         $modelClassFile = Yii::getAlias('@' . str_replace('\\', '/', $this->ns)) . '/' . $className . '.php';
         if ($this->generateModelClass || !is_file($modelClassFile)) {
             return new CodeFile($modelClassFile, $this->render('model-extended.php', $params));
+        } else {
+            return null;
+        }
+    }
+
+    public function renderSearch($params)
+    {
+        $className = $params['className'];
+        $modelClassFile = Yii::getAlias('@' . str_replace('\\', '/', $this->ns)) . '/' . $className . '.php';
+        if (!is_file($modelClassFile)) {
+            return new CodeFile($modelClassFile, $this->render('search.php', $params));
         } else {
             return null;
         }
