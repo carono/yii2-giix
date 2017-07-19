@@ -10,6 +10,7 @@ use Nette\PhpGenerator\PhpNamespace;
  * @var $generator yii\gii\generators\model\Generator
  * @var $className string class name
  * @var $modelClassName string related model class name
+ * @var string $queryClassName
  */
 
 $modelFullClassName = $modelClassName;
@@ -18,11 +19,10 @@ if ($generator->ns !== $generator->queryNs) {
 }
 
 $namespace = new PhpNamespace($generator->queryNs);
-
 $class = $namespace->addClass($className);
 $class->addComment("This is the ActiveQuery class for $modelFullClassName");
 $class->addComment("@see $modelFullClassName");
-$class->addExtend("{$generator->ns}\base\\$queryClassName");
+$class->addExtend("{$generator->queryNs}\base\\$queryClassName");
 
 echo "<?php\n";
 echo $namespace;

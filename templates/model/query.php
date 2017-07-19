@@ -16,7 +16,7 @@ if ($generator->ns !== $generator->queryNs) {
     $modelFullClassName = '\\' . $generator->ns . '\\' . $modelFullClassName;
 }
 
-$namespace = new PhpNamespace("{$generator->ns}\base");
+$namespace = new PhpNamespace("{$generator->queryNs}\base");
 $namespace->addUse('yii\data\Sort');
 $namespace->addUse('yii\data\ActiveDataProvider');
 
