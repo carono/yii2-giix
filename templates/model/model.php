@@ -98,7 +98,7 @@ if(!empty($enum)){
      */
     public static function tableName()
     {
-        return '<?= $tableName ?>';
+        return '{{%<?= $tableName ?>}}';
     }
 <?php if (isset($translation)): ?>
     /**

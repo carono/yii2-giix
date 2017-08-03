@@ -31,7 +31,7 @@ class Generator extends \schmunk42\giiant\generators\model\Generator
             $tableSchema = $db->getTableSchema($tableName);
 
             $params = [
-                'tableName' => $tableName,
+                'tableName' =>  substr($tableName, strlen($db->tablePrefix)),
                 'className' => $className,
                 'queryClassName' => $queryClassName,
                 'tableSchema' => $tableSchema,
