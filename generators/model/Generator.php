@@ -11,6 +11,8 @@ use yii\helpers\StringHelper;
 
 class Generator extends \schmunk42\giiant\generators\model\Generator
 {
+    public $jsonForms = false;
+
     /**
      * {@inheritdoc}
      */
@@ -31,7 +33,7 @@ class Generator extends \schmunk42\giiant\generators\model\Generator
             $tableSchema = $db->getTableSchema($tableName);
 
             $params = [
-                'tableName' =>  substr($tableName, strlen($db->tablePrefix)),
+                'tableName' => substr($tableName, strlen($db->tablePrefix)),
                 'className' => $className,
                 'queryClassName' => $queryClassName,
                 'tableSchema' => $tableSchema,
@@ -60,11 +62,13 @@ class Generator extends \schmunk42\giiant\generators\model\Generator
             /*
              * create gii/[name]GiiantModel.json with actual form data
              */
-            $suffix = str_replace(' ', '', $this->getName());
-            $formDataDir = Yii::getAlias('@' . str_replace('\\', '/', $this->ns));
-            $formDataFile = StringHelper::dirname($formDataDir) . '/gii' . '/' . $tableName . $suffix . '.json';
-            $formData = json_encode(SaveForm::getFormAttributesValues($this, $this->formAttributes()));
-            $files[] = new CodeFile($formDataFile, $formData);
+            if ($this->jsonForms) {
+                $suffix = str_replace(' ', '', $this->getName());
+                $formDataDir = Yii::getAlias('@' . str_replace('\\', '/', $this->ns));
+                $formDataFile = StringHelper::dirname($formDataDir) . '/gii' . '/' . $tableName . $suffix . '.json';
+                $formData = json_encode(SaveForm::getFormAttributesValues($this, $this->formAttributes()));
+                $files[] = new CodeFile($formDataFile, $formData);
+            }
         }
 
         return $files;
