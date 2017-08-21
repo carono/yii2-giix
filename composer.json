@@ -11,7 +11,8 @@
   ],
   "require": {
     "schmunk42/yii2-giiant": "@stable",
-    "nette/php-generator": "@stable"
+    "nette/php-generator": "@stable",
+    "carono/yii2-widgets": "@stable"
   },
   "autoload": {
     "psr-4": {

@@ -1,4 +1,5 @@
 <?php
+
 use Nette\PhpGenerator\PhpNamespace;
 
 /**
@@ -46,11 +47,12 @@ $method->addParameter('filter', null);
 $method->addParameter('options', []);
 $method->addComment("@return ActiveDataProvider");
 $body = <<<PHP
-\$this->filter(\$filter);
+\$query = clone \$this;
+\$query->filter(\$filter);
 \$sort = new Sort();
     return new ActiveDataProvider(
     array_merge([
-        'query' => \$this,
+        'query' => \$query,
         'sort'  => \$sort
     ], \$options)
 );
@@ -63,7 +65,7 @@ $method->addComment('@return $this');
 $method->addParameter('model', null);
 $body = <<<PHP
 if (\$model){
-//
+    QueryHelper::regular(\$model, \$this);
 }
 return \$this;
 PHP;
