@@ -18,6 +18,7 @@ if ($generator->ns !== $generator->queryNs) {
 }
 
 $namespace = new PhpNamespace("{$generator->queryNs}\base");
+$namespace->addUse('carono\yii2helpers\QueryHelper');
 $namespace->addUse('yii\data\Sort');
 $namespace->addUse('yii\data\ActiveDataProvider');
 
