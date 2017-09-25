@@ -25,6 +25,28 @@ class Generator extends \schmunk42\giiant\generators\model\Generator
     }
 
     /**
+     * @return array
+     */
+    protected function getTemplateFiles()
+    {
+        $defaultFiles = $this->findFiles('@vendor/carono/yii2-giix/templates/model');
+        $currentFiles = $this->findFiles($this->templatePath);
+        $templates = $defaultFiles;
+
+        foreach ($defaultFiles as $file => $path) {
+            if (isset($currentFiles[$file]) && file_exists($currentFiles[$file])) {
+                $templates[$file] = $currentFiles[$file];
+            }
+        }
+        foreach ($currentFiles as $file => $path) {
+            if (!isset($templates[$file])) {
+                $templates[$file] = $path;
+            }
+        }
+        return $templates;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function generate()
@@ -64,19 +86,12 @@ class Generator extends \schmunk42\giiant\generators\model\Generator
             $params['timestamp'] = $this->generateTimestamp($tableSchema);
 
 
-            $defaultFiles = $this->findFiles('@vendor/carono/yii2-giix/templates/model');
-            $currentFiles = $this->findFiles($this->templatePath);
-            foreach ($defaultFiles as $file => $path) {
-                if (isset($currentFiles[$file]) && file_exists($currentFiles[$file])) {
-                    $defaultFiles[$file] = $currentFiles[$file];
-                }
-            }
-            foreach ($defaultFiles as $file) {
+            $templates = $this->getTemplateFiles();
+            foreach ($templates as $file) {
                 if ($code = $this->generateFile($file, $params)) {
                     $files[] = $code;
                 }
             }
-
             /*
              * create gii/[name]GiiantModel.json with actual form data
              */
@@ -206,10 +221,10 @@ class Generator extends \schmunk42\giiant\generators\model\Generator
     /**
      * @param ClassGenerator|null $class
      * @param $params
-     * @param $file
+     * @param $filePath
      * @return null|CodeFile
      */
-    public function renderQueryExtended($class, $params, $file)
+    public function renderQueryExtended($class, $params, $filePath)
     {
         $queryClassName = $params['queryClassName'];
         $className = $params['className'];
@@ -231,10 +246,10 @@ class Generator extends \schmunk42\giiant\generators\model\Generator
     /**
      * @param ClassGenerator|null $class
      * @param $params
-     * @param $file
+     * @param $filePath
      * @return null|CodeFile
      */
-    public function renderQuery($class, $params, $file)
+    public function renderQuery($class, $params, $filePath)
     {
         $queryClassName = $params['queryClassName'];
         $className = $params['className'];
@@ -260,10 +275,10 @@ class Generator extends \schmunk42\giiant\generators\model\Generator
     /**
      * @param ClassGenerator|null $class
      * @param $params
-     * @param $file
+     * @param $filePath
      * @return CodeFile
      */
-    public function renderModel($class, $params, $file)
+    public function renderModel($class, $params, $filePath)
     {
         $className = $params['className'];
         $alias = '@' . str_replace('\\', '/', $this->ns);
@@ -278,10 +293,10 @@ class Generator extends \schmunk42\giiant\generators\model\Generator
     /**
      * @param ClassGenerator|null $class
      * @param $params
-     * @param $file
+     * @param $filePath
      * @return null|CodeFile
      */
-    public function renderModelExtended($class, $params, $file)
+    public function renderModelExtended($class, $params, $filePath)
     {
         $className = $params['className'];
         $modelClassFile = Yii::getAlias('@' . str_replace('\\', '/', $this->ns)) . '/' . $className . '.php';
@@ -299,10 +314,10 @@ class Generator extends \schmunk42\giiant\generators\model\Generator
     /**
      * @param ClassGenerator|null $class
      * @param $params
-     * @param $file
+     * @param $filePath
      * @return null|CodeFile
      */
-    public function renderSearch($class, $params, $file)
+    public function renderSearch($class, $params, $filePath)
     {
         $className = $params['className'];
         $modelClassFile = Yii::getAlias('@' . str_replace('\\', '/', $this->ns)) . '/' . $className . '.php';
