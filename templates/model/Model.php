@@ -16,14 +16,23 @@ class Model extends ClassGenerator
 {
     protected function classUses()
     {
-        return ['Yii'];
+        return ['Yii', 'yii\helpers\ArrayHelper'];
     }
 
     /**
      * @return array
      */
-    protected function phpDocProperties()
+    protected function phpProperties()
     {
+        $relationClasses = [];
+        foreach ($this->params['relations'] as $name => $relation) {
+            if (preg_match('/.*hasOne.*\\\(.*)::className\(\).*\[.*\s=>\s\'(.*)\'\]/', $relation[0], $m)) {
+                $relationClasses[$m[2]] = $this->generator->ns . "\\" . $relation[1];
+            }
+        }
+        $property = $this->phpClass->addProperty('_relationClasses', $relationClasses);
+        $property->setVisibility('protected');
+
         return [];
     }
 
@@ -219,4 +228,15 @@ PHP;
         return false;
     }
 
+    /**
+     * @param Method $method
+     * @return null
+     */
+    public function getRelationClass($method)
+    {
+        $method->addParameter('attribute');
+        $method->addComment('@param string $attribute');
+        $method->addComment('@return string|null');
+        $method->addBody('return ArrayHelper::getValue($this->_relationClasses, $attribute);');
+    }
 }

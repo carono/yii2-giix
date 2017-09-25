@@ -311,23 +311,6 @@ class Generator extends \schmunk42\giiant\generators\model\Generator
         }
     }
 
-    /**
-     * @param ClassGenerator|null $class
-     * @param $params
-     * @param $filePath
-     * @return null|CodeFile
-     */
-    public function renderSearch($class, $params, $filePath)
-    {
-        $className = $params['className'];
-        $modelClassFile = Yii::getAlias('@' . str_replace('\\', '/', $this->ns)) . '/' . $className . '.php';
-        if (!is_file($modelClassFile)) {
-            return new CodeFile($modelClassFile, $this->render('search.php', $params));
-        } else {
-            return null;
-        }
-    }
-
     public function requiredTemplates()
     {
         return [];
