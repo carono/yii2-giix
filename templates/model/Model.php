@@ -16,7 +16,7 @@ class Model extends ClassGenerator
 {
     protected function classUses()
     {
-        return ['Yii', 'yii\helpers\ArrayHelper','yii\db\ActiveRecord'];
+        return ['Yii', 'yii\helpers\ArrayHelper', 'yii\db\ActiveRecord'];
     }
 
     /**
@@ -130,9 +130,10 @@ class Model extends ClassGenerator
         $method->addParameter('condition');
         $method->addParameter('raise', false);
         $method->addComment('@inheritdoc');
-        $method->addComment("@return \\$ns\\$className|yii\db\ActiveRecord");
+        $method->addComment("@return \\$ns\\$className|\yii\db\ActiveRecord");
         $method->setStatic();
-        $message = "Yii::t('errors', 'Model $ns\\$className not found')";
+        $fullClass = str_replace('\\', '\\\\', $ns . '\\' . $className);
+        $message = "Yii::t('errors', \"Model $fullClass not found\")";
         $body = <<<PHP
 \$model = parent::findOne(\$condition);
 if (!\$model && \$raise){
