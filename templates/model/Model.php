@@ -16,7 +16,7 @@ class Model extends ClassGenerator
 {
     protected function classUses()
     {
-        return ['Yii', 'yii\helpers\ArrayHelper'];
+        return ['Yii', 'yii\helpers\ArrayHelper','yii\db\ActiveRecord'];
     }
 
     /**

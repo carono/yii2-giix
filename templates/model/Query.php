@@ -12,7 +12,7 @@ class Query extends ClassGenerator
     protected function classUses()
     {
         return [
-            'Yii',
+            'yii\db\ActiveQuery',
             'yii\data\Sort',
             'yii\data\ActiveDataProvider'
         ];
