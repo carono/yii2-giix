@@ -153,7 +153,7 @@ PHP;
         $method->addComment('@inheritdoc');
         $strings = '';
         foreach ($labels as $name => $label) {
-            $strings[] = "\t'$name' => " . $this->generator->generateString($label);
+            $strings[] = "    '$name' => " . $this->generator->generateString($label);
         }
         $method->addBody("return [\n" . join(",\n", $strings) . "\n];");
     }
@@ -220,7 +220,7 @@ PHP;
             foreach ($value['values'] as $k => $labelValue) {
                 $constName = $labelValue['const_name'];
                 $label = $this->generator->generateString($labelValue['label']);
-                $strings[] = "\tself::$constName => $label";
+                $strings[] = "    self::$constName => $label";
             }
             $method->addBody("return [\n" . join(",\n", $strings) . "\n];");
             $method->addComment("column $name ENUM value labels");
