@@ -2,7 +2,7 @@
 
 namespace carono\giix\templates\model;
 
-use carono\giix\ClassGenerator;
+use carono\codegen\ClassGenerator;
 use carono\giix\generators\model\Generator;
 use Nette\PhpGenerator\Method;
 
@@ -14,10 +14,15 @@ use Nette\PhpGenerator\Method;
  */
 class Model extends ClassGenerator
 {
+    protected function classUses()
+    {
+        return ['Yii'];
+    }
+
     /**
      * @return array
      */
-    protected function properties()
+    protected function phpDocProperties()
     {
         return [];
     }
@@ -25,7 +30,7 @@ class Model extends ClassGenerator
     /**
      * @return array
      */
-    protected function constants()
+    protected function classConstants()
     {
         $constants = [];
         $enum = $this->params['enum'];
@@ -40,7 +45,7 @@ class Model extends ClassGenerator
     /**
      * @return array
      */
-    protected function traits()
+    protected function classTraits()
     {
         return [$this->generator->baseTraits];
     }
@@ -48,9 +53,9 @@ class Model extends ClassGenerator
     /**
      * @return array
      */
-    protected function comments()
+    protected function phpDocComments()
     {
-        $comments = parent::comments();
+        $comments = parent::phpDocComments();
         $tableName = $this->generator->generateTableName($this->params['tableName']);
 
         $comments[] = "This is the model class for table \"$tableName\".\n";
@@ -171,7 +176,7 @@ PHP;
                 $queryNs = '\yii\db\ActiveQuery';
             }
             $comment = "@return $queryNs";
-            $method = $this->class->addMethod("get{$name}");
+            $method = $this->phpClass->addMethod("get{$name}");
             $method->addComment($comment);
             $method->addBody($relation[0]);
         }
@@ -186,7 +191,7 @@ PHP;
     {
         $enum = $this->params['enum'];
         foreach ($enum as $name => $value) {
-            $method = $this->class->addMethod($value['func_get_label_name']);
+            $method = $this->phpClass->addMethod($value['func_get_label_name']);
             $method->addParameter('value');
             $method->setStatic();
             $functionName = $value['func_opts_name'];
@@ -198,7 +203,7 @@ PHP;
             $method->addComment('@param string $value');
             $method->addComment('@return string');
 
-            $method = $this->class->addMethod($value['func_opts_name']);
+            $method = $this->phpClass->addMethod($value['func_opts_name']);
             $method->setStatic();
 
             $strings = [];

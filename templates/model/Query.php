@@ -4,20 +4,21 @@
 namespace carono\giix\templates\model;
 
 
-use carono\giix\ClassGenerator;
+use carono\codegen\ClassGenerator;
 use Nette\PhpGenerator\Method;
 
 class Query extends ClassGenerator
 {
-    protected function uses()
+    protected function classUses()
     {
         return [
+            'Yii',
             'yii\data\Sort',
             'yii\data\ActiveDataProvider'
         ];
     }
 
-    protected function comments()
+    protected function phpDocComments()
     {
         return [
             "This is the ActiveQuery class for " . $this->params['modelFullClassName'],
@@ -82,7 +83,7 @@ PHP;
         $method->addComment('@return $this');
         $method->addParameter('model', null);
         if (class_exists('carono\yii2helpers\QueryHelper')) {
-            $this->owner->addUse('carono\yii2helpers\QueryHelper');
+            $this->phpNamespace->addUse('carono\yii2helpers\QueryHelper');
             $regular = <<<PHP
 if (\$model instanceof \yii\db\ActiveRecord){
     QueryHelper::regular(\$model, \$this);
