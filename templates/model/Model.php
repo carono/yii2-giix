@@ -67,17 +67,18 @@ class Model extends ClassGenerator
         $comments = parent::phpDocComments();
         $tableName = $this->generator->generateTableName($this->params['tableName']);
 
-        $comments[] = "This is the model class for table \"$tableName\".\n";
+        $comments[] = "This is the base-model class for table \"$tableName\".\n";
 
         foreach ($this->params['tableSchema']->columns as $column) {
             $comments[] = "@property {$column->phpType} \${$column->name}";
         }
         $relations = $this->params['relations'];
         $ns = $this->params['ns'];
+        $comments[] = '';
         if (!empty($relations)) {
             foreach ($relations as $name => $relation) {
                 $property = "\\" . $ns . '\\' . $relation[1] . ($relation[2] ? '[]' : '') . ' $' . lcfirst($name);
-                $comments[] = "@property $property\n";
+                $comments[] = "@property $property";
             }
         }
         return $comments;
