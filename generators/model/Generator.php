@@ -168,16 +168,38 @@ class Generator extends \schmunk42\giiant\generators\model\Generator
     {
         $name = pathinfo($filePath, PATHINFO_FILENAME);
         $method = 'render' . Inflector::camelize($name);
-        if (method_exists($this, $method)) {
-            if ($className = self::getClassFromFile($filePath)) {
-                $class = new $className();
-                if (property_exists($class, 'generator')) {
-                    $class->generator = $this;
-                }
-            } else {
-                $class = null;
+        if ($className = self::getClassFromFile($filePath)) {
+            $class = new $className();
+            if (property_exists($class, 'generator')) {
+                $class->generator = $this;
             }
+        } else {
+            $class = null;
+        }
+        if (method_exists($this, $method)) {
             return call_user_func_array([$this, $method], [$class, $params, $filePath]);
+        } else {
+            return $this->defaultRender($class, $params, $filePath);
+        }
+    }
+
+    /**
+     * @param ClassGenerator|null $class
+     * @param $params
+     * @param $filePath
+     * @return null|CodeFile
+     */
+    protected function defaultRender($class, $params, $filePath)
+    {
+        if ($class instanceof ClassGenerator) {
+            $content = $class->render($params);
+            if ($output = $class->output) {
+                return new CodeFile($output, $content);
+            } else {
+                return null;
+            }
+        } else {
+            return null;
         }
     }
 
