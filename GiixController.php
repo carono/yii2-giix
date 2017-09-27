@@ -6,6 +6,7 @@ use schmunk42\giiant\commands\BatchController;
 
 class GiixController extends BatchController
 {
+    public $exceptTables = [];
     public $modelNamespace = 'app\models';
     public $overwrite = true;
     public $defaultAction = 'models';
@@ -20,6 +21,9 @@ class GiixController extends BatchController
             $this->tablePrefix = \Yii::$app->db->tablePrefix;
         }
         foreach ($this->tables as &$table) {
+            $table = preg_replace('#{{%([\w\d\-_]+)}}#', $this->tablePrefix . "$1", $table);
+        }
+        foreach ($this->exceptTables as &$table) {
             $table = preg_replace('#{{%([\w\d\-_]+)}}#', $this->tablePrefix . "$1", $table);
         }
         if (key_exists('@common', \Yii::$aliases)) {
@@ -43,13 +47,18 @@ class GiixController extends BatchController
 
     public static function addTemplateToGiiGenerator(&$config, $generator, $name, $template)
     {
-        self::prepareGii($config);
-        $config['modules']['gii']['generators'][$name] = [
-            'class' => $generator,
+        $generatorClass = [
             'templates' => [
                 'caronoModel' => $template
             ]
         ];
+        if (is_string($generator)) {
+            $generatorClass['class'] = $generator;
+        } else {
+            $generatorClass = array_merge($generatorClass, $generator);
+        }
+        self::prepareGii($config);
+        $config['modules']['gii']['generators'][$name] = $generatorClass;
     }
 
     protected static function prepareGii(&$config)

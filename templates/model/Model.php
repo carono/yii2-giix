@@ -19,6 +19,21 @@ class Model extends ClassGenerator
         return ['Yii', 'yii\helpers\ArrayHelper', 'yii\db\ActiveRecord'];
     }
 
+    protected function formClassNamespace()
+    {
+        return $this->params['ns'] . "\base";
+    }
+
+    protected function formClassName()
+    {
+        return $this->params['className'];
+    }
+
+    protected function formExtends()
+    {
+        return '\\' . ltrim($this->params['baseClass'], '\\');
+    }
+
     /**
      * @return array
      */

@@ -18,6 +18,21 @@ class Query extends ClassGenerator
         ];
     }
 
+    protected function formClassNamespace()
+    {
+        return "{$this->params['queryNs']}\base";
+    }
+
+    protected function formExtends()
+    {
+        return $this->params['queryBaseClass'];
+    }
+
+    protected function formClassName()
+    {
+        return $this->params['queryClassName'];
+    }
+
     protected function phpDocComments()
     {
         return [
