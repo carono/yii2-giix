@@ -16,6 +16,12 @@ class GiixController extends BatchController
 
     public function init()
     {
+        if (!$this->tablePrefix) {
+            $this->tablePrefix = \Yii::$app->db->tablePrefix;
+        }
+        foreach ($this->tables as &$table) {
+            $table = preg_replace('#{{%([\w\d\-_]+)}}#', $this->tablePrefix . "$1", $table);
+        }
         if (key_exists('@common', \Yii::$aliases)) {
             if ($this->modelNamespace == 'app\models') {
                 $this->modelNamespace = 'common\models';
