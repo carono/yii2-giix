@@ -196,11 +196,19 @@ class Generator extends \schmunk42\giiant\generators\model\Generator
         $queryClassName = $params['queryClassName'];
         $className = $params['className'];
         if ($queryClassName) {
+            if ($this->ns !== $this->queryNs) {
+                $params['modelFullClassName'] = '\\' . $this->ns . '\\' . $className;
+            }else{
+                $params['modelFullClassName'] = $className;
+            }
+            $class->namespace = "{$this->queryNs}\base";
+            $class->extends = $this->queryBaseClass;
             $alias = '@' . str_replace('\\', '/', $this->queryNs);
-            $queryClassFile = Yii::getAlias($alias) . '/base/' . $queryClassName . '.php';
+            $output = Yii::getAlias($alias) . '/base/' . $queryClassName . '.php';
             $params['className'] = $queryClassName;
             $params['modelClassName'] = $className;
-            return new CodeFile($queryClassFile, $this->render('query.php', $params));
+            $content = $class->render($className, $params);
+            return new CodeFile($output, $content);
         }
         return null;
     }
