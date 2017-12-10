@@ -7,6 +7,7 @@ use carono\giix\Event;
 use schmunk42\giiant\helpers\SaveForm;
 use yii\gii\CodeFile;
 use Yii;
+use yii\helpers\ArrayHelper;
 use yii\helpers\FileHelper;
 use yii\helpers\Inflector;
 use yii\helpers\StringHelper;
@@ -14,6 +15,8 @@ use yii\helpers\StringHelper;
 class Generator extends \schmunk42\giiant\generators\model\Generator
 {
     public $jsonForms = false;
+    public $relationNames = [];
+    public $useTablePrefix = true;
 
     protected function findFiles($folder)
     {
@@ -45,6 +48,64 @@ class Generator extends \schmunk42\giiant\generators\model\Generator
             }
         }
         return $templates;
+    }
+
+    public static function expandTablePrefix($table, $tablePrefix)
+    {
+        return self::setTablePrefix($table, $tablePrefix);
+    }
+
+    /**
+     * @param $table
+     * @param $prefix
+     * @return mixed
+     * @internal param $prefix
+     */
+    public static function setTablePrefix($table, $prefix)
+    {
+        return preg_replace('#{{%([\w\d\-_]+)}}#', $prefix . "$1", $table);
+    }
+
+
+    public static function hideTablePrefix($table, $prefix)
+    {
+        if (preg_match("/^{$prefix}(.*?)$/", $table, $matches)) {
+            return $table;
+        } else {
+            return preg_replace("/^{$prefix}(.*?)$/", "{{%$1}}", $table);
+        }
+    }
+
+    protected function generateRelations()
+    {
+        $relations = parent::generateRelations();
+        foreach ($this->relationNames as $table => $values) {
+            $table = preg_replace('#{{%([\w\d\-_]+)}}#', $this->tablePrefix . "$1", $table);
+            foreach (ArrayHelper::getValue($relations, $table, []) as $name => $relation) {
+                foreach ($values as $value) {
+                    $needModel = $value['model'] == $relation[1];
+                    $needType = ($relation[2] && $value['type'] == 'many') || (!$relation[2] && $value['type'] == 'one');
+                    $pattern = "\['{$value['refField']}' => '{$value['field']}'\]\)";
+                    if (isset($value['via'])) {
+                        if ($this->useTablePrefix) {
+                            $viaTable = self::hideTablePrefix($value['via']['refTable'], $this->tablePrefix);
+                        } else {
+                            $viaTable = self::expandTablePrefix($value['via']['refTable'], $this->tablePrefix);
+                        }
+                        $pattern2 = "\['{$value['via']['refField']}' => '{$value['via']['field']}'\]";
+                        $pattern3 = "{$pattern}->viaTable\('$viaTable', $pattern2\);";
+                        $needFields = preg_match("/$pattern3/", $relation[0]);
+                    } else {
+                        $needFields = preg_match("/$pattern;/", $relation[0]);
+                    }
+                    if ($needModel && $needType && $needFields) {
+                        unset($relations[$table][$name]);
+                        $relations[$table][ucfirst($value['name'])] = $relation;
+                    }
+                }
+            }
+        }
+        return $relations;
     }
 
     /**

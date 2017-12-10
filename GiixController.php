@@ -14,6 +14,7 @@ class GiixController extends BatchController
     public $template = 'caronoModel';
     public $templatePath;
     public $generator = 'carono\giix\generators\model\Generator';
+    public $relationNames = [];
 
     public function init()
     {
@@ -42,23 +43,19 @@ class GiixController extends BatchController
         $name = 'giiant-model';
         $template = $this->templatePath ? $this->templatePath : '@vendor/carono/yii2-giix/templates/model';
         self::addTemplateToGiiGenerator($config, $this->generator, $name, $template);
+        $config['modules']['gii']['generators'][$name]['relationNames'] = $this->relationNames;
         return $config;
     }
 
     public static function addTemplateToGiiGenerator(&$config, $generator, $name, $template)
     {
-        $generatorClass = [
+        self::prepareGii($config);
+        $config['modules']['gii']['generators'][$name] = [
+            'class' => $generator,
             'templates' => [
                 'caronoModel' => $template
             ]
         ];
-        if (is_string($generator)) {
-            $generatorClass['class'] = $generator;
-        } else {
-            $generatorClass = array_merge($generatorClass, $generator);
-        }
-        self::prepareGii($config);
-        $config['modules']['gii']['generators'][$name] = $generatorClass;
     }
 
     protected static function prepareGii(&$config)
