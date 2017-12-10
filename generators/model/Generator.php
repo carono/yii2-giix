@@ -96,7 +96,7 @@ class Generator extends \schmunk42\giiant\generators\model\Generator
                         $pattern3 = "{$pattern}->viaTable\('$viaTable', $pattern2\);";
                         $needFields = preg_match("/$pattern3/", $relation[0]);
                     } else {
-                        $needFields = preg_match("/$pattern;/", $relation[0]);
+                        $needFields = preg_match("/$pattern;/", $relation[0]) && !preg_match('/viaTable/i', $relation[0]);
                     }
                     if ($needModel && $needType && $needFields) {
                         unset($relations[$table][$name]);
