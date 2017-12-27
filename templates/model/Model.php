@@ -167,7 +167,7 @@ PHP;
     {
         $labels = $this->params['labels'];
         $method->addComment('@inheritdoc');
-        $strings = '';
+        $strings = [];
         foreach ($labels as $name => $label) {
             $strings[] = "    '$name' => " . $this->generator->generateString($label);
         }
