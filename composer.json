@@ -10,9 +10,8 @@
     }
   ],
   "require": {
-    "schmunk42/yii2-giiant": "@stable",
     "nette/php-generator": "@stable",
-    "carono/codegen": "@stable"
+    "carono/codegen": "^0.0.4"
   },
   "autoload": {
     "psr-4": {
