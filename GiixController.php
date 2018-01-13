@@ -2,8 +2,6 @@
 
 namespace carono\giix;
 
-use schmunk42\giiant\commands\BatchController;
-
 class GiixController extends BatchController
 {
     public $exceptTables = [];
