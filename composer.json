@@ -10,7 +10,7 @@
     }
   ],
   "require": {
-    "schmunk42/yii2-giiant": "@stable",
+    "schmunk42/yii2-giiant": "0.10.0-beta2",
     "nette/php-generator": "@stable",
     "carono/codegen": "@stable"
   },
