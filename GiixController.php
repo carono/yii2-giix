@@ -2,11 +2,9 @@
 
 namespace carono\giix;
 
-use schmunk42\giiant\commands\BatchController;
-
 class GiixController extends BatchController
 {
-    public $exceptTables = [];
+
     public $modelNamespace = 'app\models';
     public $overwrite = true;
     public $defaultAction = 'models';
@@ -40,7 +38,7 @@ class GiixController extends BatchController
     protected function getYiiConfiguration()
     {
         $config = parent::getYiiConfiguration();
-        $name = 'giiant-model';
+        $name = 'carono-model';
         $template = $this->templatePath ? $this->templatePath : '@vendor/carono/yii2-giix/templates/model';
         self::addTemplateToGiiGenerator($config, $this->generator, $name, $template);
         $config['modules']['gii']['generators'][$name]['relationNames'] = $this->relationNames;

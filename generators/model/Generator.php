@@ -4,15 +4,13 @@ namespace carono\giix\generators\model;
 
 use carono\codegen\ClassGenerator;
 use carono\giix\Event;
-use schmunk42\giiant\helpers\SaveForm;
 use yii\gii\CodeFile;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\FileHelper;
 use yii\helpers\Inflector;
-use yii\helpers\StringHelper;
 
-class Generator extends \schmunk42\giiant\generators\model\Generator
+class Generator extends BaseGenerator
 {
     public $jsonForms = false;
     public $relationNames = [];
@@ -118,11 +116,8 @@ class Generator extends \schmunk42\giiant\generators\model\Generator
         $db = $this->getDbConnection();
 
         foreach ($this->getTableNames() as $tableName) {
-            list($relations, $translations) = array_values($this->extractTranslations($tableName, $relations));
 
-            $className = php_sapi_name() === 'cli'
-                ? $this->generateClassName($tableName)
-                : $this->modelClass;
+            $className = php_sapi_name() === 'cli' ? $this->generateClassName($tableName) : $this->modelClass;
 
             $queryClassName = ($this->generateQuery) ? $this->generateQueryClassName($className) : false;
             $tableSchema = $db->getTableSchema($tableName);
@@ -147,25 +142,11 @@ class Generator extends \schmunk42\giiant\generators\model\Generator
                 $params['translation'] = $translations;
             }
 
-            $params['blameable'] = $this->generateBlameable($tableSchema);
-            $params['timestamp'] = $this->generateTimestamp($tableSchema);
-
-
             $templates = $this->getTemplateFiles();
             foreach ($templates as $file) {
                 if ($code = $this->generateFile($file, $params)) {
                     $files[] = $code;
                 }
-            }
-            /*
-             * create gii/[name]GiiantModel.json with actual form data
-             */
-            if ($this->jsonForms) {
-                $suffix = str_replace(' ', '', $this->getName());
-                $formDataDir = Yii::getAlias('@' . str_replace('\\', '/', $this->ns));
-                $formDataFile = StringHelper::dirname($formDataDir) . '/gii' . '/' . $tableName . $suffix . '.json';
-                $formData = json_encode(SaveForm::getFormAttributesValues($this, $this->formAttributes()));
-                $files[] = new CodeFile($formDataFile, $formData);
             }
         }
 
@@ -303,7 +284,7 @@ class Generator extends \schmunk42\giiant\generators\model\Generator
             if ($queryClassName) {
                 $alias = '@' . str_replace('\\', '/', $this->queryNs);
                 $output = Yii::getAlias($alias) . '/' . $queryClassName . '.php';
-                if ($this->generateModelClass || !is_file($output)) {
+                if (!is_file($output)) {
                     return new CodeFile($output, $class->render($params));
                 }
             }
@@ -314,7 +295,7 @@ class Generator extends \schmunk42\giiant\generators\model\Generator
             if ($queryClassName) {
                 $alias = '@' . str_replace('\\', '/', $this->queryNs);
                 $output = Yii::getAlias($alias) . '/' . $queryClassName . '.php';
-                if ($this->generateModelClass || !is_file($output)) {
+                if (!is_file($output)) {
                     $params['className'] = $queryClassName;
                     $params['modelClassName'] = $className;
                     return new CodeFile($output, $this->render('query-extended.php', $params));
@@ -394,7 +375,7 @@ class Generator extends \schmunk42\giiant\generators\model\Generator
         if ($class) {
             $className = $params['className'];
             $output = Yii::getAlias('@' . str_replace('\\', '/', $this->ns)) . '/' . $className . '.php';
-            if ($this->generateModelClass || !is_file($output)) {
+            if (!is_file($output)) {
                 return new CodeFile($output, $class->render($params));
             } else {
                 return null;
@@ -402,7 +383,7 @@ class Generator extends \schmunk42\giiant\generators\model\Generator
         } else {
             $className = $params['className'];
             $output = Yii::getAlias('@' . str_replace('\\', '/', $this->ns)) . '/' . $className . '.php';
-            if ($this->generateModelClass || !is_file($output)) {
+            if (!is_file($output)) {
                 return new CodeFile($output, $this->render('model-extended.php', $params));
             } else {
                 return null;

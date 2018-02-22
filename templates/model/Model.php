@@ -71,7 +71,7 @@ class Model extends ClassGenerator
      */
     protected function classTraits()
     {
-        return [$this->generator->baseTraits];
+        return [];
     }
 
     /**
