@@ -10,6 +10,7 @@
     }
   ],
   "require": {
+    "yiisoft/yii2": "~2.0",
     "nette/php-generator": "@stable",
     "carono/codegen": "^0.0.4"
   },

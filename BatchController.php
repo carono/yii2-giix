@@ -8,9 +8,13 @@ use yii\helpers\Inflector;
 
 /**
  * @author Tobias Munk <schmunk@usrbin.de>
+ *
+ * @property array $yiiConfiguration
  */
 class BatchController extends Controller
 {
+    public $exceptTables = ['{{%migration}}'];
+
     /**
      * @var string the generator template name
      */
@@ -107,7 +111,7 @@ class BatchController extends Controller
     protected $appConfig;
 
     /**
-     * @var instance of class schmunk42\giiant\generators\model\Generator
+     * @var \carono\giix\generators\model\Generator
      */
     protected $modelGenerator;
 
@@ -162,6 +166,7 @@ class BatchController extends Controller
                 return false;
             }
         }
+        $this->tables = array_diff($this->tables, $this->exceptTables);
 
         return parent::beforeAction($action);
     }
@@ -173,9 +178,8 @@ class BatchController extends Controller
      */
     public function actionIndex()
     {
-        echo "Running full giiant batch...\n";
+        echo "Running model batch...\n";
         $this->actionModels();
-        $this->actionCruds();
     }
 
     /**
@@ -207,7 +211,7 @@ class BatchController extends Controller
                 'generateLabelsFromComments' => $this->modelGenerateLabelsFromComments,
                 'generateHintsFromComments' => $this->modelGenerateHintsFromComments,
             ];
-            $route = 'gii/giiant-model';
+            $route = 'gii/carono-model';
 
             $app = \Yii::$app;
             $temp = new \yii\console\Application($this->appConfig);

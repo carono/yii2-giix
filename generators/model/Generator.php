@@ -4,13 +4,11 @@ namespace carono\giix\generators\model;
 
 use carono\codegen\ClassGenerator;
 use carono\giix\Event;
-use schmunk42\giiant\helpers\SaveForm;
 use yii\gii\CodeFile;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\FileHelper;
 use yii\helpers\Inflector;
-use yii\helpers\StringHelper;
 
 class Generator extends BaseGenerator
 {
@@ -144,25 +142,11 @@ class Generator extends BaseGenerator
                 $params['translation'] = $translations;
             }
 
-//            $params['blameable'] = $this->generateBlameable($tableSchema);
-//            $params['timestamp'] = $this->generateTimestamp($tableSchema);
-
-
             $templates = $this->getTemplateFiles();
             foreach ($templates as $file) {
                 if ($code = $this->generateFile($file, $params)) {
                     $files[] = $code;
                 }
-            }
-            /*
-             * create gii/[name]GiiantModel.json with actual form data
-             */
-            if ($this->jsonForms) {
-                $suffix = str_replace(' ', '', $this->getName());
-                $formDataDir = Yii::getAlias('@' . str_replace('\\', '/', $this->ns));
-                $formDataFile = StringHelper::dirname($formDataDir) . '/gii' . '/' . $tableName . $suffix . '.json';
-                $formData = json_encode(SaveForm::getFormAttributesValues($this, $this->formAttributes()));
-                $files[] = new CodeFile($formDataFile, $formData);
             }
         }
 
