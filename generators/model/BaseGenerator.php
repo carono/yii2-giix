@@ -15,6 +15,7 @@ use schmunk42\giiant\helpers\SaveForm;
  */
 class BaseGenerator extends \yii\gii\generators\model\Generator
 {
+    public $exceptFieldRules = ['created_at', 'updated_at', 'created_by', 'updated_by'];
     /**
      * @var null string for the table prefix, which is ignored in generated class name
      */
@@ -354,6 +355,13 @@ class BaseGenerator extends \yii\gii\generators\model\Generator
     public function generateRules($table)
     {
         $columns = [];
+
+        foreach ($table->columns as $index => $column) {
+            if (in_array($column->name, $this->exceptFieldRules)) {
+                $columns[$index] = $column;
+                unset($table->columns[$index]);
+            }
+        }
 
         $rules = [];
 
