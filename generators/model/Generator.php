@@ -261,6 +261,9 @@ class Generator extends BaseGenerator
     {
         if ($class instanceof ClassGenerator) {
             $content = $class->render($params);
+            if (!empty($class->skipIfExist) && file_exists($class->output)) {
+                return null;
+            }
             if ($output = $class->output) {
                 return new CodeFile($output, $content);
             } else {

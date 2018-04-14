@@ -3,7 +3,8 @@
 
 namespace carono\giix\templates\model;
 
-use carono\codegen\ClassGenerator;
+
+use carono\giix\ClassGenerator;
 
 class ModelExtended extends ClassGenerator
 {

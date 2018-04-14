@@ -4,7 +4,7 @@
 namespace carono\giix\templates\model;
 
 
-use carono\codegen\ClassGenerator;
+use carono\giix\ClassGenerator;
 use Nette\PhpGenerator\Method;
 
 class Query extends ClassGenerator

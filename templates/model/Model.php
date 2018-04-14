@@ -2,7 +2,7 @@
 
 namespace carono\giix\templates\model;
 
-use carono\codegen\ClassGenerator;
+use carono\giix\ClassGenerator;
 use carono\giix\generators\model\Generator;
 use Nette\PhpGenerator\Method;
 
