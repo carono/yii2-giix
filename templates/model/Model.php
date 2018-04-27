@@ -37,7 +37,7 @@ class Model extends ClassGenerator
     /**
      * @return array
      */
-    protected function phpProperties()
+    protected function classProperties()
     {
         $relationClasses = [];
         foreach ($this->params['relations'] as $name => $relation) {
@@ -45,10 +45,12 @@ class Model extends ClassGenerator
                 $relationClasses[$m[2]] = $this->generator->ns . "\\" . $relation[1];
             }
         }
-        $property = $this->phpClass->addProperty('_relationClasses', $relationClasses);
-        $property->setVisibility('protected');
-
-        return [];
+        return [
+            '_relationClasses' => [
+                'value' => $relationClasses,
+                'visibility' => 'protected'
+            ]
+        ];
     }
 
     /**
