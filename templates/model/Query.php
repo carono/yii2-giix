@@ -9,6 +9,31 @@ use Nette\PhpGenerator\Method;
 
 class Query extends ClassGenerator
 {
+    public $depends = [
+        'QueryExtended'
+    ];
+
+    public function render($params = [])
+    {
+        $queryClassName = $params['queryClassName'];
+        $className = $params['className'];
+        if ($queryClassName) {
+            if ($params['ns'] !== $params['queryNs']) {
+                $params['modelFullClassName'] = '\\' . $params['ns'] . '\\' . $className;
+            } else {
+                $params['modelFullClassName'] = $className;
+            }
+        }
+        return parent::render($params);
+    }
+
+    protected function formOutputPath()
+    {
+        $alias = '@' . str_replace('\\', '/', $this->params['queryNs']);
+        $output = \Yii::getAlias($alias) . '/base/' . $this->params['queryClassName'] . '.php';
+        return $output;
+    }
+
     protected function classUses()
     {
         return [

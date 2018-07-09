@@ -8,6 +8,14 @@ use carono\giix\ClassGenerator;
 
 class ModelExtended extends ClassGenerator
 {
+    public $skipIfExist = true;
+
+    protected function formOutputPath()
+    {
+        $className = $this->params['className'];
+        return \Yii::getAlias('@' . str_replace('\\', '/', $this->params['ns'])) . '/' . $className . '.php';
+    }
+
     protected function formExtends()
     {
         return $this->params['ns'] . '\base\\' . $this->params['className'];

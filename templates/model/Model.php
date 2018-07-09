@@ -14,6 +14,17 @@ use Nette\PhpGenerator\Method;
  */
 class Model extends ClassGenerator
 {
+    public $depends = [
+        'ModelExtended'
+    ];
+
+    public function formOutputPath()
+    {
+        $className = $this->params['className'];
+        $alias = '@' . str_replace('\\', '/', $this->params['ns']);
+        return \Yii::getAlias($alias) . '/base/' . $className . $this->params['baseClassSuffix'] . '.php';
+    }
+
     protected function classUses()
     {
         return ['Yii', 'yii\helpers\ArrayHelper', 'yii\db\ActiveRecord'];

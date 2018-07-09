@@ -8,9 +8,17 @@ use carono\giix\ClassGenerator;
 
 class QueryExtended extends ClassGenerator
 {
+    public $skipIfExist = true;
+
     protected function formClassNamespace()
     {
         return $this->params['queryNs'];
+    }
+
+    protected function formOutputPath()
+    {
+        $alias = '@' . str_replace('\\', '/', $this->params['queryNs']);
+        return \Yii::getAlias($alias) . '/' . $this->params['queryClassName'] . '.php';
     }
 
     protected function formExtends()

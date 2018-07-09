@@ -9,19 +9,21 @@ use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\FileHelper;
 use yii\helpers\Inflector;
+use yii\helpers\StringHelper;
 
 class Generator extends BaseGenerator
 {
     public $jsonForms = false;
     public $relationNames = [];
     public $useTablePrefix = true;
+    protected $process = [];
 
     protected function findFiles($folder)
     {
         $result = [];
         $path = Yii::getAlias($folder);
         foreach (FileHelper::findFiles($path) as $file) {
-            $result[substr($file, strlen($path) + 1)] = realpath($file);
+            $result[pathinfo($file, PATHINFO_FILENAME)] = realpath($file);
         }
         return $result;
     }
@@ -45,6 +47,10 @@ class Generator extends BaseGenerator
                 $templates[$file] = $path;
             }
         }
+
+        foreach ($templates as $file => &$value) {
+            $value = self::getClassFromFile($value);
+        }
         return $templates;
     }
 
@@ -61,28 +67,27 @@ class Generator extends BaseGenerator
      */
     public static function setTablePrefix($table, $prefix)
     {
-        return preg_replace('#{{%([\w\d\-_]+)}}#', $prefix . "$1", $table);
+        return preg_replace('#{{%([\w\-_]+)}}#', $prefix . '$1', $table);
     }
-
 
     public static function hideTablePrefix($table, $prefix)
     {
         if (preg_match("/^{$prefix}(.*?)$/", $table, $matches)) {
             return $table;
-        } else {
-            return preg_replace("/^{$prefix}(.*?)$/", "{{%$1}}", $table);
         }
+
+        return preg_replace("/^{$prefix}(.*?)$/", '{{%$1}}', $table);
     }
 
     protected function generateRelations()
     {
         $relations = parent::generateRelations();
         foreach ($this->relationNames as $table => $values) {
-            $table = preg_replace('#{{%([\w\d\-_]+)}}#', $this->tablePrefix . "$1", $table);
+            $table = preg_replace('#{{%([\w\-_]+)}}#', $this->tablePrefix . "$1", $table);
             foreach (ArrayHelper::getValue($relations, $table, []) as $name => $relation) {
                 foreach ($values as $value) {
-                    $needModel = $value['model'] == $relation[1];
-                    $needType = ($relation[2] && $value['type'] == 'many') || (!$relation[2] && $value['type'] == 'one');
+                    $needModel = $value['model'] === $relation[1];
+                    $needType = ($relation[2] && $value['type'] === 'many') || (!$relation[2] && $value['type'] === 'one');
                     $pattern = "\['{$value['refField']}' => '{$value['field']}'\]\)";
                     if (isset($value['via'])) {
                         if ($this->useTablePrefix) {
@@ -119,7 +124,7 @@ class Generator extends BaseGenerator
 
             $className = php_sapi_name() === 'cli' ? $this->generateClassName($tableName) : $this->modelClass;
 
-            $queryClassName = ($this->generateQuery) ? $this->generateQueryClassName($className) : false;
+            $queryClassName = $this->generateQuery ? $this->generateQueryClassName($className) : false;
             $tableSchema = $db->getTableSchema($tableName);
 
             $params = [
@@ -136,21 +141,84 @@ class Generator extends BaseGenerator
                 'relations' => isset($relations[$tableName]) ? $relations[$tableName] : [],
                 'ns' => $this->ns,
                 'enum' => $this->getEnum($tableSchema->columns),
+                'baseClassSuffix' => $this->baseClassSuffix
             ];
 
-            if (!empty($translations)) {
-                $params['translation'] = $translations;
-            }
-
-            $templates = $this->getTemplateFiles();
-            foreach ($templates as $file) {
-                if ($code = $this->generateFile($file, $params)) {
-                    $files[] = $code;
+            $this->process = $this->getTemplateFiles();
+            foreach ($this->process as $file) {
+                if ($codes = $this->generateClass($file, $params)) {
+                    $files = array_merge($files, $codes);
                 }
             }
         }
 
         return $files;
+    }
+
+    protected function getProcessClassByBasename($basename)
+    {
+        foreach ($this->process as $name => $class) {
+            if ($name === $basename || $basename === $class) {
+                return $class;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param ClassGenerator $className
+     * @param $params
+     * @return CodeFile[]
+     */
+    public function generateClass($className, $params)
+    {
+        $class = new $className();
+        $class->generator = $this;
+        $result = [];
+//        if ($class instanceof \carono\giix\ClassGenerator) {
+//            foreach ($class->depends as $basename) {
+//                if ($dependClass = $this->getProcessClassByBasename($basename)) {
+//                    $result = array_merge($this->generateClass($dependClass, $params), $result);
+//                }
+//            }
+//        }
+        $result[] = $currentResult = $this->defaultRender($class, $params);
+
+        unset($this->process[StringHelper::basename($className)]);
+
+
+        $this->trigger('afterRender', new Event([
+            'class' => $class,
+            'params' => $params,
+            'render' => (boolean)$currentResult
+        ]));
+        return array_filter($result);
+    }
+
+    /**
+     * @param ClassGenerator|null $class
+     * @param $params
+     * @param $filePath
+     * @return null|CodeFile
+     */
+    protected function defaultRender($class, $params)
+    {
+        if ($class instanceof ClassGenerator) {
+            $content = $class->render($params);
+            if ($class instanceof \carono\giix\ClassGenerator && $class->skipIfExist && file_exists($class->output)) {
+                return null;
+            }
+            if ($output = $class->output) {
+                return new CodeFile($output, $content);
+            }
+        }
+
+        return null;
+    }
+
+    public function requiredTemplates()
+    {
+        return [];
     }
 
     /**
@@ -217,185 +285,5 @@ class Generator extends BaseGenerator
         //Build the fully-qualified class name and return it
         return $namespace ? $namespace . '\\' . $class : $class;
 
-    }
-
-    /**
-     * @param $filePath
-     * @param $params
-     * @return CodeFile
-     * @throws \Exception
-     */
-    public function generateFile($filePath, $params)
-    {
-        $name = pathinfo($filePath, PATHINFO_FILENAME);
-        $method = 'render' . Inflector::camelize($name);
-        if ($className = self::getClassFromFile($filePath)) {
-            $class = new $className();
-            if (property_exists($class, 'generator')) {
-                $class->generator = $this;
-            }
-        } else {
-            $class = null;
-        }
-        if (method_exists($this, $method)) {
-            $result = call_user_func_array([$this, $method], [$class, $params, $filePath]);
-        } else {
-            $result = $this->defaultRender($class, $params, $filePath);
-        }
-        $this->trigger('afterRender', new Event([
-            'class' => $class,
-            'params' => $params,
-            'filePath' => $filePath,
-            'render' => (boolean)$result
-        ]));
-        return $result;
-    }
-
-    /**
-     * @param ClassGenerator|null $class
-     * @param $params
-     * @param $filePath
-     * @return null|CodeFile
-     */
-    protected function defaultRender($class, $params, $filePath)
-    {
-        if ($class instanceof ClassGenerator) {
-            $content = $class->render($params);
-            if (!empty($class->skipIfExist) && file_exists($class->output)) {
-                return null;
-            }
-            if ($output = $class->output) {
-                return new CodeFile($output, $content);
-            } else {
-                return null;
-            }
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * @param ClassGenerator|null $class
-     * @param $params
-     * @param $filePath
-     * @return null|CodeFile
-     */
-    public function renderQueryExtended($class, $params, $filePath)
-    {
-        if ($class) {
-            $queryClassName = $params['queryClassName'];
-            if ($queryClassName) {
-                $alias = '@' . str_replace('\\', '/', $this->queryNs);
-                $output = Yii::getAlias($alias) . '/' . $queryClassName . '.php';
-                if (!is_file($output)) {
-                    return new CodeFile($output, $class->render($params));
-                }
-            }
-            return null;
-        } else {
-            $queryClassName = $params['queryClassName'];
-            $className = $params['className'];
-            if ($queryClassName) {
-                $alias = '@' . str_replace('\\', '/', $this->queryNs);
-                $output = Yii::getAlias($alias) . '/' . $queryClassName . '.php';
-                if (!is_file($output)) {
-                    $params['className'] = $queryClassName;
-                    $params['modelClassName'] = $className;
-                    return new CodeFile($output, $this->render('query-extended.php', $params));
-                }
-            }
-            return null;
-        }
-    }
-
-    /**
-     * @param ClassGenerator|null $class
-     * @param $params
-     * @param $filePath
-     * @return null|CodeFile
-     */
-    public function renderQuery($class, $params, $filePath)
-    {
-        if ($class) {
-            $queryClassName = $params['queryClassName'];
-            $className = $params['className'];
-            if ($queryClassName) {
-                if ($this->ns !== $this->queryNs) {
-                    $params['modelFullClassName'] = '\\' . $this->ns . '\\' . $className;
-                } else {
-                    $params['modelFullClassName'] = $className;
-                }
-                $alias = '@' . str_replace('\\', '/', $this->queryNs);
-                $output = Yii::getAlias($alias) . '/base/' . $queryClassName . '.php';
-                $content = $class->render($params);
-                return new CodeFile($output, $content);
-            }
-            return null;
-        } else {
-            $queryClassName = $params['queryClassName'];
-            $className = $params['className'];
-            if ($queryClassName) {
-                $alias = '@' . str_replace('\\', '/', $this->queryNs);
-                $queryClassFile = Yii::getAlias($alias) . '/base/' . $queryClassName . '.php';
-                $params['className'] = $queryClassName;
-                $params['modelClassName'] = $className;
-                return new CodeFile($queryClassFile, $this->render('query.php', $params));
-            }
-            return null;
-        }
-    }
-
-    /**
-     * @param ClassGenerator|null $class
-     * @param $params
-     * @param $filePath
-     * @return CodeFile
-     */
-    public function renderModel($class, $params, $filePath)
-    {
-        if ($class) {
-            $className = $params['className'];
-            $alias = '@' . str_replace('\\', '/', $this->ns);
-            $outputPath = Yii::getAlias($alias) . '/base/' . $className . $this->baseClassSuffix . '.php';
-            $content = $class->render($params);
-            return new CodeFile($outputPath, $content);
-        } else {
-            $className = $params['className'];
-            $alias = '@' . str_replace('\\', '/', $this->ns);
-            $content = $this->render('model.php', $params);
-            return new CodeFile(Yii::getAlias($alias) . '/base/' . $className . $this->baseClassSuffix . '.php', $content);
-        }
-    }
-
-    /**
-     * @param ClassGenerator|null $class
-     * @param $params
-     * @param $filePath
-     * @return null|CodeFile
-     */
-    public function renderModelExtended($class, $params, $filePath)
-    {
-        if ($class) {
-            $className = $params['className'];
-            $output = Yii::getAlias('@' . str_replace('\\', '/', $this->ns)) . '/' . $className . '.php';
-            if (!is_file($output)) {
-                return new CodeFile($output, $class->render($params));
-            } else {
-                return null;
-            }
-        } else {
-            $className = $params['className'];
-            $output = Yii::getAlias('@' . str_replace('\\', '/', $this->ns)) . '/' . $className . '.php';
-            if (!is_file($output)) {
-                return new CodeFile($output, $this->render('model-extended.php', $params));
-            } else {
-                return null;
-            }
-        }
-    }
-
-    public function requiredTemplates()
-    {
-        return [];
     }
 }
