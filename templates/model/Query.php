@@ -35,12 +35,27 @@ class Query extends ClassGenerator
 
     protected function phpDocComments()
     {
+        $modelFullClassName = $this->params['modelFullClassName'];
         return [
-            "This is the ActiveQuery class for " . $this->params['modelFullClassName'],
-            "@see " . $this->params['modelFullClassName']
+            "This is the ActiveQuery class for $modelFullClassName",
+            "@see $modelFullClassName",
+            "@method \yii\db\BatchQueryResult|{$modelFullClassName}[] each(\$batchSize, \$db)",
+            "@method \yii\db\BatchQueryResult|{$modelFullClassName}[] batch(\$batchSize, \$db)",
         ];
     }
 
+    /**
+     * @param Method $method
+     */
+    public function all($method)
+    {
+        $modelFullClassName = $this->params['modelFullClassName'];
+        $method->addParameter('db', null);
+        $method->addBody('return parent::all($db);');
+        $method->addComment('@inheritdoc');
+        $method->addComment("@return {$modelFullClassName}[]");
+    }
+    
     /**
      * @param Method $method
      */
