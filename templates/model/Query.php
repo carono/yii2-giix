@@ -44,18 +44,6 @@ class Query extends ClassGenerator
     /**
      * @param Method $method
      */
-    public function all($method)
-    {
-        $modelFullClassName = $this->params['modelFullClassName'];
-        $method->addParameter('db', null);
-        $method->addBody('return parent::all($db);');
-        $method->addComment('@inheritdoc');
-        $method->addComment("@return {$modelFullClassName}[]");
-    }
-
-    /**
-     * @param Method $method
-     */
     public function one($method)
     {
         $modelFullClassName = $this->params['modelFullClassName'];
