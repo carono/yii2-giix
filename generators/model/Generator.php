@@ -4,11 +4,14 @@ namespace carono\giix\generators\model;
 
 use carono\codegen\ClassGenerator;
 use carono\giix\Event;
-use yii\gii\CodeFile;
 use Yii;
+use yii\gii\CodeFile;
 use yii\helpers\ArrayHelper;
 use yii\helpers\FileHelper;
 use yii\helpers\Inflector;
+use function defined;
+use const T_NAME_FULLY_QUALIFIED;
+use const T_NAME_QUALIFIED;
 
 class Generator extends BaseGenerator
 {
@@ -155,8 +158,8 @@ class Generator extends BaseGenerator
 
     /**
      * @param $path_to_file
-     * @link http://jarretbyrne.com/2015/06/197/
      * @return mixed|string
+     * @link http://jarretbyrne.com/2015/06/197/
      */
     public static function getClassFromFile($path_to_file)
     {
@@ -184,9 +187,13 @@ class Generator extends BaseGenerator
 
             //While we're grabbing the namespace name...
             if ($getting_namespace === true) {
-
+                if (defined('T_NAME_FULLY_QUALIFIED') && defined('T_NAME_QUALIFIED')) {
+                    $namespaceTokens = [T_STRING, T_NS_SEPARATOR, T_NAME_FULLY_QUALIFIED, T_NAME_QUALIFIED];
+                } else {
+                    $namespaceTokens = [T_STRING, T_NS_SEPARATOR];
+                }
                 //If the token is a string or the namespace separator...
-                if (is_array($token) && in_array($token[0], [T_STRING, T_NS_SEPARATOR])) {
+                if (is_array($token) && in_array($token[0], $namespaceTokens)) {
 
                     //Append the token's value to the name of the namespace
                     $namespace .= $token[1];
