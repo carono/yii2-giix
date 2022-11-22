@@ -39,8 +39,8 @@ class Query extends ClassGenerator
         return [
             "This is the ActiveQuery class for $modelFullClassName",
             "@see $modelFullClassName",
-            "@method \yii\db\BatchQueryResult|{$modelFullClassName}[] each(\$batchSize, \$db)",
-            "@method \yii\db\BatchQueryResult|{$modelFullClassName}[] batch(\$batchSize, \$db)",
+            "@method \yii\db\BatchQueryResult|{$modelFullClassName}[] each(\$batchSize = 100, \$db = null)",
+            "@method \yii\db\BatchQueryResult|{$modelFullClassName}[] batch(\$batchSize = 100, \$db = null)",
         ];
     }
 
