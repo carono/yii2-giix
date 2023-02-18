@@ -41,7 +41,7 @@ class Model extends ClassGenerator
     {
         $relationClasses = [];
         foreach ($this->params['relations'] as $name => $relation) {
-            if (preg_match('/.*hasOne.*\\\(.*)::className\(\).*\[.*\s=>\s\'(.*)\'\]/', $relation[0], $m)) {
+            if (preg_match('/.*hasOne.*\\\(.*)::class.*\[.*\s=>\s\'(.*)\'\]/', $relation[0], $m)) {
                 $relationClasses[$m[2]] = $this->generator->ns . "\\" . $relation[1];
             }
         }
@@ -198,7 +198,7 @@ PHP;
     {
         $relations = $this->params['relations'];
         foreach ($relations as $name => $relation) {
-            if (preg_match('/.*[hasOne|hasMany].*\\\(.*)::className\(\).*\[.*\s=>\s\'(.*)\'\]/', $relation[0], $m)) {
+            if (preg_match('/.*[hasOne|hasMany].*\\\(.*)::class.*\[.*\s=>\s\'(.*)\'\]/', $relation[0], $m)) {
                 $queryNs = '\\' . $this->generator->queryNs . '\\' . $m[1] . "Query|\yii\db\ActiveQuery";
             } else {
                 $queryNs = '\yii\db\ActiveQuery';
