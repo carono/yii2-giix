@@ -13,6 +13,12 @@ use yii\helpers\Inflector;
  */
 class BatchController extends Controller
 {
+    /**
+     * @var array table names or masks to exclude from batch generation.
+     *            Supports exact names (`migration`), Yii wrapping (`{{%migration}}`,
+     *            where `%` is replaced with db tablePrefix) and glob masks
+     *            (`log_*`, `{{%log_*}}`, `temp_??`).
+     */
     public $exceptTables = ['{{%migration}}'];
 
     /**
@@ -166,9 +172,56 @@ class BatchController extends Controller
                 return false;
             }
         }
-        $this->tables = array_diff($this->tables, $this->exceptTables);
+        $this->tables = $this->filterExceptTables($this->tables);
 
         return parent::beforeAction($action);
+    }
+
+    /**
+     * Filters out tables matching entries in `$exceptTables`.
+     *
+     * Each entry can be an exact table name, a glob mask (`*`, `?`) or a
+     * Yii-style wrapping `{{%name}}` / `{{name}}`. In the `{{%...}}` form the
+     * `%` placeholder is replaced with the configured db tablePrefix.
+     *
+     * @param array $tables
+     * @return array
+     */
+    protected function filterExceptTables(array $tables)
+    {
+        if (empty($this->exceptTables)) {
+            return $tables;
+        }
+
+        $prefix = '';
+        $db = \Yii::$app->get($this->modelDb, false);
+        if ($db !== null) {
+            $prefix = $db->tablePrefix;
+        }
+
+        $patterns = [];
+        foreach ($this->exceptTables as $pattern) {
+            if (preg_match('/^\{\{%(.+)\}\}$/', $pattern, $m)) {
+                $patterns[] = $prefix . $m[1];
+            } elseif (preg_match('/^\{\{(.+)\}\}$/', $pattern, $m)) {
+                $patterns[] = $m[1];
+            } else {
+                $patterns[] = $pattern;
+            }
+        }
+
+        return array_values(array_filter($tables, function ($table) use ($patterns) {
+            foreach ($patterns as $pattern) {
+                if (strpbrk($pattern, '*?[') !== false) {
+                    if (fnmatch($pattern, $table)) {
+                        return false;
+                    }
+                } elseif ($pattern === $table) {
+                    return false;
+                }
+            }
+            return true;
+        }));
     }
 
     /**
